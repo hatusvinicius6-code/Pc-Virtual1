@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>VirtualPC</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+    font-family:Arial,Segoe UI,sans-serif;
+    overflow:hidden;
+    background:#080b12;
+    color:white;
+}
+button,input,textarea{font:inherit}
+
+#login{
+    position:fixed;
+    inset:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#070a11,#17233b,#080b12);
+}
+.login-box{
+    width:360px;
+    padding:35px;
+    text-align:center;
+    background:#111827ee;
+    border:1px solid #ffffff18;
+    border-radius:22px;
+    box-shadow:0 25px 80px #0008;
+}
+.avatar{
+    width:75px;
+    height:75px;
+    margin:auto auto 18px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    font-size:32px;
+    font-weight:bold;
+    background:linear-gradient(135deg,#6d5dfc,#24b8ff);
+}
+.login-box h1{font-size:30px}
+.login-box p{color:#929db1;margin:8px 0 25px}
+.login-box input{
+    width:100%;
+    padding:13px;
+    margin-bottom:12px;
+    border:1px solid #ffffff18;
+    border-radius:10px;
+    outline:none;
+    background:#080c14;
+    color:white;
+}
+.login-box button{
+    width:100%;
+    padding:13px;
+    border:0;
+    border-radius:10px;
+    background:#6d5dfc;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#pc{
+    position:fixed;
+    inset:0;
+    background:
+    radial-gradient(circle at 75% 20%,#344c7d,transparent 30%),
+    radial-gradient(circle at 20% 75%,#1d385b,transparent 35%),
+    linear-gradient(135deg,#080c15,#101a2e,#070a10);
+}
+
+.hidden{display:none!important}
+
+.icons{
+    position:absolute;
+    top:20px;
+    left:18px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+.icon{
+    width:85px;
+    padding:8px;
+    background:transparent;
+    color:white;
+    border:0;
+    border-radius:10px;
+    cursor:pointer;
+}
+.icon:hover{background:#ffffff18}
+.icon span{
+    display:block;
+    font-size:34px;
+    margin-bottom:5px;
+}
+.icon b{font-size:12px}
+
+.taskbar{
+    position:absolute;
+    bottom:0;
+    left:0;
+    right:0;
+    height:55px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:6px 10px;
+    background:#0a0f19eF;
+    border-top:1px solid #ffffff12;
+    backdrop-filter:blur(15px);
+}
+.start{
+    width:42px;
+    height:42px;
+    border:0;
+    border-radius:10px;
+    background:#ffffff10;
+    color:white;
+    font-size:27px;
+    cursor:pointer;
+}
+.start:hover{background:#ffffff20}
+
+.tasks{display:flex;gap:5px;flex:1}
+.task{
+    padding:0 13px;
+    height:42px;
+    border:0;
+    border-radius:9px;
+    background:#ffffff0c;
+    color:white;
+    cursor:pointer;
+}
+
+.clock{
+    color:#b8c1d2;
+    font-size:13px;
+    padding:10px;
+}
+
+.start-menu{
+    position:absolute;
+    z-index:9999;
+    bottom:63px;
+    left:10px;
+    width:340px;
+    padding:18px;
+    background:#0e1420f5;
+    border:1px solid #ffffff18;
+    border-radius:18px;
+    backdrop-filter:blur(20px);
+    box-shadow:0 25px 70px #0009;
+}
+.user{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    padding-bottom:15px;
+    border-bottom:1px solid #ffffff10;
+}
+.mini{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    display:grid;
+    place-items:center;
+    background:#6d5dfc;
+    font-weight:bold;
+}
+.user small{
+    display:block;
+    color:#7f8a9d;
+    margin-top:3px;
+}
+.apps{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+    margin:15px 0;
+}
+.apps button{
+    padding:13px;
+    border:0;
+    border-radius:9px;
+    background:#ffffff08;
+    color:white;
+    cursor:pointer;
+}
+.apps button:hover{background:#ffffff16}
+
+.logout{
+    width:100%;
+    padding:10px;
+    border:0;
+    border-radius:9px;
+    background:#ff4b5c18;
+    color:#ff8792;
+    cursor:pointer;
+}
+
+.window{
+    position:absolute;
+    z-index:20;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-54%);
+    width:min(760px,calc(100vw - 30px));
+    height:min(520px,calc(100vh - 90px));
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    background:#101621f7;
+    border:1px solid #ffffff18;
+    border-radius:14px;
+    box-shadow:0 30px 100px #0009;
+    backdrop-filter:blur(20px);
+}
+.window.max{
+    inset:10px 10px 65px;
+    width:auto;
+    height:auto;
+    transform:none;
+}
+
+.bar{
+    height:45px;
+    min-height:45px;
+    display:flex;
+    align-items:center;
+    padding:0 10px;
+    background:#ffffff05;
+    border-bottom:1px solid #ffffff10;
+}
+.bar strong{flex:1;font-size:13px}
+.controls{display:flex;gap:5px}
+.controls button{
+    width:29px;
+    height:29px;
+    border:0;
+    border-radius:7px;
+    background:#ffffff0b;
+    color:white;
+    cursor:pointer;
+}
+.controls .x:hover{background:#e34d5c}
+
+.content{
+    flex:1;
+    min-height:0;
+    overflow:auto;
+}
+
+/* Arquivos */
+.files{
+    display:grid;
+    grid-template-columns:160px 1fr;
+    height:100%;
+}
+.side{
+    padding:12px;
+    border-right:1px solid #ffffff10;
+}
+.side button{
+    width:100%;
+    padding:10px;
+    margin-bottom:4px;
+    border:0;
+    border-radius:8px;
+    background:transparent;
+    color:#aab4c6;
+    text-align:left;
+    cursor:pointer;
+}
+.side button:hover{
+    background:#ffffff0c;
+    color:white;
+}
+.file-area{padding:20px}
+.file-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(110px,1fr));
+    gap:10px;
+    margin-top:20px;
+}
+.file{
+    padding:18px 8px;
+    text-align:center;
+    background:#ffffff05;
+    border:1px solid #ffffff0c;
+    border-radius:10px;
+}
+.file span{
+    display:block;
+    font-size:35px;
+    margin-bottom:8px;
+}
+
+/* Notas */
+.notes{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+.notes textarea{
+    flex:1;
+    resize:none;
+    outline:none;
+    border:0;
+    padding:20px;
+    background:#080d15;
+    color:white;
+    line-height:1.6;
+}
+.save{
+    padding:11px;
+    border:0;
+    background:#6d5dfc;
+    color:white;
+    cursor:pointer;
+}
+
+/* Terminal */
+.terminal{
+    height:100%;
+    padding:18px;
+    background:#06090d;
+    font-family:Consolas,monospace;
+}
+.output{
+    height:calc(100% - 35px);
+    overflow:auto;
+    white-space:pre-wrap;
+    color:#cdd5e1;
+}
+.cmd{
+    display:flex;
+    gap:8px;
+}
+.cmd span{color:#65df9b}
+.cmd input{
+    flex:1;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:white;
+    font-family:inherit;
+}
+
+/* Navegador */
+.browser{
+    height:100%;
+    display:flex;
+    flex-direction:column;
+}
+.browser-bar{
+    display:flex;
+    gap:8px;
+    padding:10px;
+    border-bottom:1px solid #ffffff10;
+}
+.browser-bar input{
+    flex:1;
+    padding:10px;
+    border:1px solid #ffffff15;
+    border-radius:8px;
+    background:#080d15;
+    color:white;
+    outline:0;
+}
+.browser-bar button{
+    padding:0 15px;
+    border:0;
+    border-radius:8px;
+    background:#6d5dfc;
+    color:white;
+}
+.browser-page{
+    flex:1;
+    display:grid;
+    place-items:center;
+    text-align:center;
+    color:#929caf;
+}
+.browser-page h2{color:white;margin-bottom:8px}
+
+/* Configurações */
+.settings{padding:22px}
+.setting{
+    padding:17px 0;
+    border-bottom:1px solid #ffffff0c;
+}
+.setting label{
+    display:flex;
+    justify-content:space-between;
+}
+.toggle{
+    width:45px;
+    height:24px;
+    padding:3px;
+    border-radius:20px;
+    background:#343c4c;
+    cursor:pointer;
+}
+.toggle i{
+    display:block;
+    width:18px;
+    height:18px;
+    border-radius:50%;
+    background:white;
+    transition:.2s;
+}
+.toggle.on{background:#6d5dfc}
+.toggle.on i{transform:translateX(21px)}
+
+@media(max-width:600px){
+    .window{
+        width:calc(100vw - 15px);
+        height:calc(100vh - 75px);
+    }
+    .start-menu{width:calc(100vw - 20px)}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="login">
+    <div class="login-box">
+        <div class="avatar">V</div>
+        <h1>VirtualPC</h1>
+        <p>Seu computador virtual no navegador</p>
+
+        <input id="username" maxlength="24" placeholder="Nome de usuário">
+        <button onclick="entrar()">Entrar</button>
+    </div>
+</div>
+
+<!-- PC -->
+<div id="pc" class="hidden">
+
+    <div class="icons">
+        <button class="icon" onclick="abrir('files')">
+            <span>📁</span>
+            <b>Arquivos</b>
+        </button>
+
+        <button class="icon" onclick="abrir('notes')">
+            <span>📝</span>
+            <b>Notas</b>
+        </button>
+
+        <button class="icon" onclick="abrir('terminal')">
+            <span>⌨️</span>
+            <b>Terminal</b>
+        </button>
+
+        <button class="icon" onclick="abrir('browser')">
+            <span>🌐</span>
+            <b>Navegador</b>
+        </button>
+
+        <button class="icon" onclick="abrir('settings')">
+            <span>⚙️</span>
+            <b>Configurações</b>
+        </button>
+    </div>
+
+    <div id="windows"></div>
+
+    <div class="taskbar">
+        <button class="start" onclick="menu()">⊞</button>
+        <div class="tasks" id="tasks"></div>
+        <div class="clock" id="clock">00:00</div>
+    </div>
+
+    <div id="startMenu" class="start-menu hidden">
+        <div class="user">
+            <div class="mini">V</div>
+            <div>
+                <b id="startUser">Usuário</b>
+                <small>VirtualPC</small>
+            </div>
+        </div>
+
+        <div class="apps">
+            <button onclick="abrir('files')">📁 Arquivos</button>
+            <button onclick="abrir('notes')">📝 Notas</button>
+            <button onclick="abrir('terminal')">⌨️ Terminal</button>
+            <button onclick="abrir('browser')">🌐 Navegador</button>
+            <button onclick="abrir('settings')">⚙️ Configurações</button>
+        </div>
+
+        <button class="logout" onclick="sair()">↪ Sair</button>
+    </div>
+
+</div>
+
+<script>
+let usuario="Usuário";
+let ordem=20;
+
+const aplicativos={
+    files:["📁","Arquivos"],
+    notes:["📝","Notas"],
+    terminal:["⌨️","Terminal"],
+    browser:["🌐","Navegador"],
+    settings:["⚙️","Configurações"]
+};
+
+function entrar(){
+    const input=document.getElementById("username");
+    usuario=input.value.trim() || "Usuário";
+
+    localStorage.setItem("virtualpc-user",usuario);
+
+    document.getElementById("login").classList.add("hidden");
+    document.getElementById("pc").classList.remove("hidden");
+    document.getElementById("startUser").textContent=usuario;
+}
+
+const salvo=localStorage.getItem("virtualpc-user");
+
+if(salvo){
+    usuario=salvo;
+    document.getElementById("username").value=salvo;
+}
+
+document.getElementById("username").addEventListener("keydown",e=>{
+    if(e.key==="Enter") entrar();
+});
+
+function menu(){
+    document.getElementById("startMenu").classList.toggle("hidden");
+}
+
+function abrir(app){
+    document.getElementById("startMenu").classList.add("hidden");
+
+    let existente=document.querySelector(`[data-app="${app}"]`);
+
+    if(existente){
+        existente.classList.remove("hidden");
+        existente.style.zIndex=++ordem;
+        return;
+    }
+
+    const win=document.createElement("div");
+
+    win.className="window";
+    win.dataset.app=app;
+    win.style.zIndex=++ordem;
+
+    const info=aplicativos[app];
+
+    win.innerHTML=`
+        <div class="bar">
+            <strong>${info[0]} ${info[1]}</strong>
+
+            <div class="controls">
+                <button class="min">—</button>
+                <button class="maximize">□</button>
+                <button class="x">×</button>
+            </div>
+        </div>
+
+        <div class="content">
+            ${conteudo(app)}
+        </div>
+    `;
+
+    document.getElementById("windows").appendChild(win);
+
+    const task=document.createElement("button");
+    task.className="task";
+    task.textContent=info[0]+" "+info[1];
+
+    task.onclick=()=>{
+        win.classList.remove("hidden");
+        win.style.zIndex=++ordem;
+    };
+
+    document.getElementById("tasks").appendChild(task);
+
+    win.querySelector(".x").onclick=()=>{
+        win.remove();
+        task.remove();
+    };
+
+    win.querySelector(".min").onclick=()=>{
+        win.classList.add("hidden");
+    };
+
+    win.querySelector(".maximize").onclick=()=>{
+        win.classList.toggle("max");
+    };
+
+    win.onclick=()=>{
+        win.style.zIndex=++ordem;
+    };
+
+    if(app==="notes") iniciarNotas(win);
+    if(app==="terminal") iniciarTerminal(win);
+    if(app==="browser") iniciarBrowser(win);
+    if(app==="settings") iniciarConfig(win);
+}
+
+function conteudo(app){
+
+    if(app==="files"){
+        return `
+        <div class="files">
+            <div class="side">
+                <button>🏠 Início</button>
+                <button>📄 Documentos</button>
+                <button>🖼️ Imagens</button>
+                <button>🎵 Música</button>
+                <button>⬇️ Downloads</button>
+            </div>
+
+            <div class="file-area">
+                <h2>Este PC</h2>
+
+                <div class="file-grid">
+                    <div class="file"><span>📁</span>Documentos</div>
+                    <div class="file"><span>📁</span>Imagens</div>
+                    <div class="file"><span>📁</span>Downloads</div>
+                    <div class="file"><span>💾</span>Disco Local</div>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    if(app==="notes"){
+        return `
+        <div class="notes">
+            <textarea id="noteText" placeholder="Digite suas notas..."></textarea>
+            <button class="save">Salvar</button>
+        </div>`;
+    }
+
+    if(app==="terminal"){
+        return `
+        <div class="terminal">
+            <div class="output" id="output">
+VirtualPC Terminal v1.0
+Digite "help" para ver os comandos.
+
+            </div>
+
+            <div class="cmd">
+                <span>${usuario}@virtualpc:~$</span>
+                <input id="command" autocomplete="off">
+            </div>
+        </div>`;
+    }
+
+    if(app==="browser"){
+        return `
+        <div class="browser">
+            <div class="browser-bar">
+                <input id="url" placeholder="Digite um endereço ou pesquisa">
+                <button id="go">Ir</button>
+            </div>
+
+            <div class="browser-page" id="page">
+                <div>
+                    <h2>🌐 Navegador VirtualPC</h2>
+                    <p>Digite algo na barra acima.</p>
+                </div>
+            </div>
+        </div>`;
+    }
+
+    return `
+    <div class="settings">
+        <h2>Configurações</h2>
+
+        <div class="setting">
+            <label>
+                Tema escuro
+                <span class="toggle on"><i></i></span>
+            </label>
+        </div>
+
+        <div class="setting">
+            <label>
+                Som do sistema
+                <span class="toggle on"><i></i></span>
+            </label>
+        </div>
+
+        <div class="setting">
+            <label>
+                Notificações
+                <span class="toggle"><i></i></span>
+            </label>
+        </div>
+
+        <div class="setting">
+            <b>Usuário</b>
+            <p>${usuario}</p>
+        </div>
+
+        <div class="setting">
+            <b>Armazenamento virtual</b>
+            <p>32 GB disponíveis</p>
+        </div>
+    </div>`;
+}
+
+function iniciarNotas(win){
+    const area=win.querySelector("#noteText");
+
+    area.value=localStorage.getItem("virtualpc-notes") || "";
+
+    win.querySelector(".save").onclick=()=>{
+        localStorage.setItem("virtualpc-notes",area.value);
+        alert("Notas salvas!");
+    };
+}
+
+function iniciarTerminal(win){
+    const input=win.querySelector("#command");
+    const output=win.querySelector("#output");
+
+    input.focus();
+
+    input.addEventListener("keydown",e=>{
+        if(e.key!=="Enter")return;
+
+        const cmd=input.value.trim();
+        input.value="";
+
+        let resposta="";
+
+        switch(cmd.toLowerCase()){
+
+            case "help":
+                resposta=
+`Comandos disponíveis:
+
+help
+clear
+date
+whoami
+about
+ls
+echo`;
+                break;
+
+            case "clear":
+                output.textContent="";
+                return;
+
+            case "date":
+                resposta=new Date().toString();
+                break;
+
+            case "whoami":
+                resposta=usuario;
+                break;
+
+            case "about":
+                resposta="VirtualPC — computador virtual feito com HTML, CSS e JavaScript.";
+                break;
+
+            case "ls":
+                resposta="Desktop/  Documentos/  Imagens/  Downloads/";
+                break;
+
+            default:
+                if(cmd.toLowerCase().startsWith("echo ")){
+                    resposta=cmd.substring(5);
+                }else{
+                    resposta=cmd
+                    ?"Comando não encontrado: "+cmd
+                    :"";
+                }
+        }
+
+        output.textContent+=
+`${usuario}@virtualpc:~$ ${cmd}
+${resposta}
+
+`;
+
+        output.scrollTop=output.scrollHeight;
+    });
+}
+
+function iniciarBrowser(win){
+    const input=win.querySelector("#url");
+    const button=win.querySelector("#go");
+    const page=win.querySelector("#page");
+
+    function navegar(){
+
+        const texto=input.value.trim();
+
+        if(!texto)return;
+
+        const seguro=texto
+            .replaceAll("&","&amp;")
+            .replaceAll("<","&lt;")
+            .replaceAll(">","&gt;");
+
+        page.innerHTML=`
+            <div>
+                <h2>🔎 ${seguro}</h2>
+                <p>Página simulada do VirtualPC.</p>
+                <p>Este navegador faz parte da simulação.</p>
+            </div>`;
+    }
+
+    button.onclick=navegar;
+
+    input.addEventListener("keydown",e=>{
+        if(e.key==="Enter")navegar();
+    });
+}
+
+function iniciarConfig(win){
+
+    win.querySelectorAll(".toggle").forEach(toggle=>{
+        toggle.onclick=()=>{
+            toggle.classList.toggle("on");
+        };
+    });
+}
+
+function sair(){
+    localStorage.removeItem("virtualpc-user");
+    location.reload();
+}
+
+setInterval(()=>{
+    document.getElementById("clock").textContent=
+    new Date().toLocaleTimeString("pt-BR",{
+        hour:"2-digit",
+        minute:"2-digit"
+    });
+},1000);
+
+document.addEventListener("click",e=>{
+    const menu=document.getElementById("startMenu");
+
+    if(
+        !e.target.closest(".start-menu") &&
+        !e.target.closest(".start")
+    ){
+        menu.classList.add("hidden");
+    }
+});
+</script>
+
+</body>
+</html># This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the "main" branch
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v4
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
